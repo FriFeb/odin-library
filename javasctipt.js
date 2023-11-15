@@ -1,4 +1,11 @@
-const bookGrid = document.querySelector(".row");
+const bookGrid = document.getElementById("books");
+const newBookBtn = document.getElementById("new-book-btn");
+const newBookForm = document.getElementById("new-book-form");
+const newBookTitle = document.getElementById("title");
+const newBookAuthor = document.getElementById("author");
+const newBookPages = document.getElementById("pages");
+const newBookRead = document.getElementById("read");
+const newBookFormBtn = document.getElementById("add-new-book-btn");
 
 const myLibrary = [];
 
@@ -64,9 +71,125 @@ function displayBooksInLibrary() {
   });
 }
 
-addBookToLibrary("The Hobbit", "J. R. R. Tolkien", 310, true);
-addBookToLibrary("The Great Gatsby", "F. Scott Fitzgerald", 225, false);
-addBookToLibrary("War and Peace", "Leo Tolstoy", 1225, false);
-addBookToLibrary("Hamlet", "William Shakespeare", 378, true);
+document.addEventListener("DOMContentLoaded", () => {
+  addBookToLibrary("The Hobbit", "J. R. R. Tolkien", 310, true);
+  addBookToLibrary("The Great Gatsby", "F. Scott Fitzgerald", 225, false);
+  addBookToLibrary("War and Peace", "Leo Tolstoy", 1225, false);
+  addBookToLibrary("Hamlet", "William Shakespeare", 378, true);
+  displayBooksInLibrary();
+});
 
-displayBooksInLibrary();
+newBookBtn.addEventListener("click", () => {
+  newBookForm.classList.toggle("visually-hidden");
+});
+
+function showTextErrorMessage(element) {
+  element.classList.remove("is-valid");
+  element.classList.add("is-invalid");
+
+  let errorContainer = element.nextElementSibling;
+
+  if (element.validity.valueMissing) {
+    errorContainer.innerText = `Fiil out this field!`;
+    return;
+  }
+
+  if (element.validity.tooShort) {
+    errorContainer.innerText = `Minimum required length is ${element.attributes.minlength.value}!`;
+    return;
+  }
+
+  if (element.validity.patternMismatch) {
+    errorContainer.innerText = `Should start with a capital letter!`;
+    return;
+  }
+}
+
+function showNumberErrorMessage(element) {
+  element.classList.remove("is-valid");
+  element.classList.add("is-invalid");
+
+  let errorContainer = element.nextElementSibling;
+
+  if (element.validity.valueMissing) {
+    errorContainer.innerText = `Fiil out this field!`;
+    return;
+  }
+
+  if (element.validity.rangeUnderflow) {
+    errorContainer.innerText = `Minimum value is ${element.attributes.min.value}!`;
+    return;
+  }
+
+  if (element.validity.rangeOverflow) {
+    errorContainer.innerText = `Maximum value is ${element.attributes.max.value}!`;
+    return;
+  }
+}
+
+function hideErrorMessage(element) {
+  element.classList.remove("is-invalid");
+  element.classList.add("is-valid");
+
+  let errorContainer = element.nextElementSibling;
+
+  errorContainer.innerText = "";
+}
+
+newBookTitle.addEventListener("focusout", () => {
+  if (!newBookTitle.validity.valid) {
+    showTextErrorMessage(newBookTitle);
+  } else {
+    hideErrorMessage(newBookTitle);
+  }
+});
+
+newBookAuthor.addEventListener("focusout", () => {
+  if (!newBookAuthor.validity.valid) {
+    showTextErrorMessage(newBookAuthor);
+  } else {
+    hideErrorMessage(newBookAuthor);
+  }
+});
+
+newBookPages.addEventListener("focusout", () => {
+  if (!newBookPages.validity.valid) {
+    showNumberErrorMessage(newBookPages);
+  } else {
+    hideErrorMessage(newBookPages);
+  }
+});
+
+newBookFormBtn.addEventListener("click", () => {
+  if (!newBookTitle.validity.valid) showTextErrorMessage(newBookTitle);
+  if (!newBookAuthor.validity.valid) showTextErrorMessage(newBookAuthor);
+  if (!newBookPages.validity.valid) showTextErrorMessage(newBookPages);
+});
+
+function clearFormInputs() {
+  newBookTitle.classList.remove("is-valid");
+  newBookAuthor.classList.remove("is-valid");
+  newBookPages.classList.remove("is-valid");
+
+  newBookTitle.value = "";
+  newBookAuthor.value = "";
+  newBookPages.value = "";
+  newBookRead.checked = false;
+}
+
+newBookForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  addBookToLibrary(
+    newBookTitle.value,
+    newBookAuthor.value,
+    newBookPages.value,
+    newBookRead.checked
+  );
+
+  displayBooksInLibrary();
+
+  clearFormInputs();
+
+  newBookForm.classList.add("visually-hidden");
+});

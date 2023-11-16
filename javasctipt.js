@@ -7,7 +7,7 @@ const newBookPages = document.getElementById("pages");
 const newBookRead = document.getElementById("read");
 const newBookFormBtn = document.getElementById("add-new-book-btn");
 
-const myLibrary = [];
+let myLibrary = [];
 
 function Book(title, author, pages, read) {
   this.title = title;
@@ -25,7 +25,7 @@ function addBookToLibrary() {
   myLibrary.push(new Book(...arguments));
 }
 
-function createBookElement() {
+function createBookElement(index) {
   const col = document.createElement("div");
   col.classList.add("col");
 
@@ -34,6 +34,10 @@ function createBookElement() {
 
   const bookBody = document.createElement("div");
   bookBody.classList.add("card-body");
+
+  const bookBodyRemoveBtn = document.createElement("button");
+  bookBodyRemoveBtn.classList.add("btn-close", "float-end");
+  bookBodyRemoveBtn.dataset.index = index;
 
   const bookBodyTitle = document.createElement("h4");
   bookBodyTitle.classList.add("card-title");
@@ -51,6 +55,7 @@ function createBookElement() {
   bookBodyRead.classList.add("card-text", "float-end");
   bookBodyRead.innerText = this.read ? "already read" : "not read yet";
 
+  bookBody.appendChild(bookBodyRemoveBtn);
   bookBody.appendChild(bookBodyTitle);
   bookBody.appendChild(bookBodyAuthor);
   bookBody.appendChild(bookBodyPages);
@@ -66,8 +71,8 @@ function createBookElement() {
 function displayBooksInLibrary() {
   bookGrid.innerHTML = "";
 
-  myLibrary.forEach((book) => {
-    bookGrid.appendChild(createBookElement.call(book));
+  myLibrary.forEach((book, index) => {
+    bookGrid.appendChild(createBookElement.call(book, index));
   });
 }
 
@@ -192,4 +197,18 @@ newBookForm.addEventListener("submit", (e) => {
   clearFormInputs();
 
   newBookForm.classList.add("visually-hidden");
+});
+
+function removeBookFromLibrary(bookIndex) {
+  myLibrary = myLibrary.filter((book, index) => Number(bookIndex) !== index);
+
+  displayBooksInLibrary();
+}
+
+bookGrid.addEventListener("click", (e) => {
+  if (e.target.nodeName !== "BUTTON") return;
+
+  if (e.target.classList.contains("btn-close")) {
+    removeBookFromLibrary(e.target.dataset.index);
+  }
 });

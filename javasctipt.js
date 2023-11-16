@@ -16,13 +16,22 @@ function Book(title, author, pages, read) {
   this.read = read;
 }
 
-Book.prototype.info = function () {
-  const str = `${this.title} by ${this.author}, ${this.pages} pages, `;
-  return str + (this.read ? "already read" : "not read yet");
+Book.prototype.toggleReadStatus = function () {
+  this.read = !this.read;
 };
 
 function addBookToLibrary() {
   myLibrary.push(new Book(...arguments));
+}
+
+function displayBookReadStatus(book, bookBodyReadInput, bookBodyReadLabelText) {
+  if (book.read) {
+    bookBodyReadInput.checked = true;
+    bookBodyReadLabelText.innerText = "already read";
+  } else {
+    bookBodyReadInput.checked = false;
+    bookBodyReadLabelText.innerText = "not read yet";
+  }
 }
 
 function createBookElement(index) {
@@ -51,19 +60,54 @@ function createBookElement(index) {
   bookBodyPages.classList.add("card-text", "float-start");
   bookBodyPages.innerText = this.pages + " pages";
 
-  const bookBodyRead = document.createElement("p");
-  bookBodyRead.classList.add("card-text", "float-end");
-  bookBodyRead.innerText = this.read ? "already read" : "not read yet";
+  const bookBodyReadContainer = document.createElement("div");
+  bookBodyReadContainer.classList.add("float-end", "form-check", "form-switch");
+  bookBodyReadContainer.dataset.index = index;
+
+  const bookBodyReadLabel = document.createElement("label");
+  bookBodyReadLabel.classList.add("form-check-label");
+
+  const bookBodyReadLabelText = document.createElement("span");
+
+  const bookBodyReadInput = document.createElement("input");
+  bookBodyReadInput.classList.add("form-check-input");
+  bookBodyReadInput.type = "checkbox";
+
+  bookBodyReadLabel.appendChild(bookBodyReadLabelText);
+  bookBodyReadLabel.appendChild(bookBodyReadInput);
+
+  bookBodyReadContainer.appendChild(bookBodyReadLabel);
+
+  displayBookReadStatus(this, bookBodyReadInput, bookBodyReadLabelText);
 
   bookBody.appendChild(bookBodyRemoveBtn);
   bookBody.appendChild(bookBodyTitle);
   bookBody.appendChild(bookBodyAuthor);
   bookBody.appendChild(bookBodyPages);
-  bookBody.appendChild(bookBodyRead);
+  bookBody.appendChild(bookBodyReadContainer);
 
   book.appendChild(bookBody);
 
   col.appendChild(book);
+
+  // const col = `
+  // <div class="col">
+  //   <div class="card border-secondary">
+  //     <div class="card-body">
+  //       <button class="btn-close float-end" data-index="${index}"></button>
+  //       <h4 class="card-title">${this.title}</h4>
+  //       <h6 class="card-subtitle text-secondary mb-3">by ${this.author}</h6>
+  //       <p class="card-text float-start">${this.pages} pages</p>
+  //       <div class="float-end form-check form-switch" data-index="${index}">
+  //         <label class="form-check-label">
+  //           <input type="checkbox" class="form-check-input">
+  //           <span></span>
+  //         </label>
+  //       </div>
+  //     </div>
+  //   </div>
+  // </div>
+  // `;
 
   return col;
 }
@@ -73,6 +117,7 @@ function displayBooksInLibrary() {
 
   myLibrary.forEach((book, index) => {
     bookGrid.appendChild(createBookElement.call(book, index));
+    // bookGrid.innerHTML += createBookElement.call(book, index);
   });
 }
 
@@ -206,9 +251,23 @@ function removeBookFromLibrary(bookIndex) {
 }
 
 bookGrid.addEventListener("click", (e) => {
-  if (e.target.nodeName !== "BUTTON") return;
-
   if (e.target.classList.contains("btn-close")) {
     removeBookFromLibrary(e.target.dataset.index);
+  }
+
+  const bookReadContainer = e.target.closest(".form-check");
+
+  if (bookReadContainer) {
+    if (e.target.nodeName === "SPAN") e.preventDefault();
+
+    const currentBook = myLibrary[bookReadContainer.dataset.index];
+
+    currentBook.toggleReadStatus();
+
+    displayBookReadStatus(
+      currentBook,
+      bookReadContainer.querySelector(".form-check-input"),
+      bookReadContainer.querySelector(".form-check-label > span")
+    );
   }
 });

@@ -9,16 +9,18 @@ const newBookFormBtn = document.getElementById("add-new-book-btn");
 
 let myLibrary = [];
 
-function Book(title, author, pages, read) {
-  this.title = title;
-  this.author = author;
-  this.pages = pages;
-  this.read = read;
-}
+class Book {
+  constructor(title, author, pages, read) {
+    this.title = title;
+    this.author = author;
+    this.pages = pages;
+    this.read = read;
+  }
 
-Book.prototype.toggleReadStatus = function () {
-  this.read = !this.read;
-};
+  toggleReadStatus() {
+    this.read = !this.read;
+  }
+}
 
 function addBookToLibrary() {
   myLibrary.push(new Book(...arguments));
